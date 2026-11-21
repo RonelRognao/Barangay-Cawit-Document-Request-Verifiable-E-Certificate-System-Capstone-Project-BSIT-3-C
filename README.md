@@ -35,7 +35,19 @@ A web-based Barangay Document Request and Verifiable E-Certificate System with Q
 - **Admin:** `admin@barangaycawit.gov.ph` / `Admin@12345`
 - **Resident:** `resident@barangaycawit.gov.ph` / `Resident@12345`
 
-## BSIT 3-C Capstone Project
+## BSIT 3-C Capstone Project:
+- Barangay Cawit Document Request & Verifiable E-Certificate System
+
+## Key Features
+- **Role-Based Access Control:** Separate, middleware-protected portals for **Residents** and **Administrators**.
+- **Online Document Requests:** Residents can request barangay documents online with auto-generated reference numbers (`BRG-...`) and real-time status tracking (*Pending*, *Under Review*, *Approved*, *Rejected*, *Completed*).
+- **Admin Request Processing:** Admins can review resident details, update application statuses, and send official remarks.
+- **E-Certificate Issuance & Revocation:** Admins can issue official electronic certificates (`BRG-CERT-...`) for approved requests and revoke invalid certificates when needed.
+- **QR Code Verification Portal:** Public verification page (`/verify`) to authenticate certificates and check revocation status via scannable QR codes.
+- **Printable PDF E-Certificates:** Residents can view and print official A4 landscape copies of their issued certificates.
+- **Notifications & Audit Logs:** Automatic resident notifications on request updates and complete admin activity logs for system accountability.
+- **Dynamic Theme Switcher:** Admin-controlled 1-click toggle between **Christmas Wonderland** and **Modern Official** themes across the entire portal.
+
 ## Group Members:
 - Ronel Rognao
 - Mike Aycardo
