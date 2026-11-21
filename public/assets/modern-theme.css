@@ -1,0 +1,134 @@
+/* =====================================
+   BARANGAY CAWIT - MODERN OFFICIAL THEME
+===================================== */
+
+body {
+    background: linear-gradient(135deg, #f8fafc, #eef2f7, #f1f5f9) !important;
+    color: #1e293b !important;
+}
+
+/* Hide seasonal decorations */
+.christmas-lights,
+.snowflake,
+.snow-decoration,
+.tree-decoration,
+.decoration,
+.welcome-tree,
+.greeting {
+    display: none !important;
+}
+
+/* Executive Navy & Teal Headers */
+.portal-header,
+.header,
+header {
+    background: linear-gradient(110deg, #0f172a, #1e3a5f, #0f766e) !important;
+    border-bottom: 3px solid #14b8a6;
+}
+
+/* Frosted Nav Bar */
+.subnav {
+    background: #ffffff !important;
+    border-bottom: 1px solid #e2e8f0 !important;
+}
+
+.nav-link {
+    color: #475569 !important;
+}
+
+.nav-link:hover {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+}
+
+.nav-link.active {
+    background: linear-gradient(120deg, #0f172a, #1e3a5f) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.18) !important;
+}
+
+/* Banners & Cards */
+.page-banner,
+.welcome {
+    background: linear-gradient(120deg, #ffffff, #f8fafc 60%, #ecfeff) !important;
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: 0 6px 20px rgba(15, 23, 42, 0.06) !important;
+}
+
+.page-banner .eyebrow,
+.welcome .small-title {
+    color: #0f766e !important;
+}
+
+.page-banner h1,
+.welcome h1,
+.welcome h2,
+.section-title,
+.brand-name,
+h1, h2, h3 {
+    color: #0f172a !important;
+}
+
+.portal-header h2,
+header h2,
+.header h1 {
+    color: #ffffff !important;
+}
+
+.glass-card,
+.card,
+.stat-card,
+.mini-stat,
+.shortcut,
+.request-card,
+.notif-item,
+.notif-summary,
+.section,
+.container:has(.brand-name) {
+    background: #ffffff !important;
+    border-color: #e2e8f0 !important;
+    box-shadow: 0 4px 18px rgba(15, 23, 42, 0.06) !important;
+}
+
+.card-icon {
+    background: #f0fdfa !important;
+    border-color: #ccfbf1 !important;
+}
+
+/* Primary Buttons (excluding Logout, Danger, and Theme Toggle) */
+.btn-winter,
+.card a,
+.shortcut a,
+.auth-submit-btn {
+    background: linear-gradient(120deg, #0f766e, #1e3a5f) !important;
+    animation: none !important;
+    box-shadow: 0 3px 10px rgba(15, 118, 110, 0.18) !important;
+}
+
+.btn-winter:hover,
+.card a:hover,
+.shortcut a:hover,
+.auth-submit-btn:hover {
+    background: linear-gradient(120deg, #0d9488, #0f172a) !important;
+}
+
+/* Tables */
+.winter-table th,
+th {
+    background: #f1f5f9 !important;
+    color: #0f172a !important;
+    border-bottom: 2px solid #cbd5e1 !important;
+}
+
+.winter-table tbody tr:hover td,
+tr:hover td {
+    background: #f8fafc !important;
+}
+
+/* Footer */
+.portal-footer,
+footer {
+    background: #f1f5f9 !important;
+    border-top: 1px solid #e2e8f0 !important;
+    color: #64748b !important;
+}
