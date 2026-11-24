@@ -12,10 +12,28 @@ class AdminActivityLog extends Model
 
     protected $fillable = [
         'admin_id',
+        'log_category',
+        'actor_name',
+        'actor_role',
         'action',
         'description',
+        'ip_address',
+        'user_agent',
+        'subject_type',
+        'subject_id',
+        'old_values',
+        'new_values',
         'created_at',
     ];
+
+    protected function casts(): array
+    {
+        return [
+            'old_values' => 'array',
+            'new_values' => 'array',
+            'created_at' => 'datetime',
+        ];
+    }
 
     public function admin()
     {

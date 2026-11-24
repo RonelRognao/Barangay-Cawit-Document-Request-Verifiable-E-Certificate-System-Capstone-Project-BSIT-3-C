@@ -136,10 +136,25 @@ h2 {
     font-weight: bold;
 }
 
+.signatures-row {
+    display: flex;
+    justify-content: {{ !empty($attestedByName) ? 'space-between' : 'flex-end' }};
+    align-items: flex-end;
+    gap: 30px;
+    margin: 14px 35px 0;
+}
+
 .signature-section {
     width: 240px;
-    margin: 18px 35px 0 auto;
     text-align: center;
+}
+
+.signature-img {
+    max-height: 46px;
+    max-width: 170px;
+    display: block;
+    margin: 0 auto -8px;
+    object-fit: contain;
 }
 
 .signature-line {
@@ -265,10 +280,8 @@ h2 {
         margin: 3px 0;
     }
 
-    .signature-section {
-        width: 220px;
-        margin: 12px 35px 0 auto;
-    }
+    .signatures-row { margin: 8px 35px 0; } 
+    .signature-section { width: 220px; } .signature-img { max-height: 36px; }
 
     .signature-name {
         font-size: 12px;
@@ -293,15 +306,13 @@ h2 {
 </div>
 
 @php
-    $verifyUrl = route('verify', ['token' => $certificate->verification_token]);
     $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?format=png&size=300x300&data=' . urlencode($verifyUrl);
-    $issuedDate = \Carbon\Carbon::parse($certificate->issued_at)->format('F d, Y');
+    $issuedDate = \Carbon\Carbon::parse($certificate->issued_at)->timezone('Asia/Manila')->format('F d, Y');
 @endphp
 
 <div class="certificate">
 
     <div class="header">
-
         <img
             src="{{ asset('assets/barangay_cawit_logo.png') }}"
             alt="Barangay Cawit Logo"
@@ -315,7 +326,6 @@ h2 {
 
             <div class="barangay-name">BARANGAY CAWIT</div>
         </div>
-
     </div>
 
     <h1>BARANGAY CERTIFICATE</h1>
@@ -326,9 +336,12 @@ h2 {
 
     <p class="description">This is to certify that</p>
 
-    <div class="resident-name">{{ $certificate->request->user->full_name }}</div>
+    <div class="resident-name">
+        {{ $certificate->request->user->full_name }}
+    </div>
 
     <p class="description">
+        of <strong>{{ $certificate->request->user->address ?: 'Barangay Cawit, Manito, Albay' }}</strong>,
         has been issued this
         <strong>{{ $certificate->request->documentType->document_name }}</strong>
         by the Office of Barangay Cawit, Municipality of Manito,
@@ -342,16 +355,29 @@ h2 {
     </p>
 
     <div class="details">
-        <strong>Certificate No.:</strong>
-        {{ $certificate->certificate_no }}
+        <strong>Purpose:</strong>
+        {{ $certificate->request->purpose }}
         <br>
 
+        <strong>Certificate No.:</strong>
+        {{ $certificate->certificate_no }}
+        &nbsp;|&nbsp;
         <strong>Reference No.:</strong>
         {{ $certificate->request->reference_no }}
         <br>
 
         <strong>Date Issued:</strong>
         {{ $issuedDate }}
+        @if ($certificate->expires_at)
+            &nbsp;|&nbsp;
+            <strong>Valid Until:</strong>
+            {{ \Carbon\Carbon::parse($certificate->expires_at)->timezone('Asia/Manila')->format('F d, Y') }}
+        @endif
+        @if (!empty($hashFingerprint))
+            &nbsp;|&nbsp;
+            <strong>Security Seal:</strong>
+            {{ $hashFingerprint }}
+        @endif
     </div>
 
     <div class="qr-section">
@@ -365,14 +391,29 @@ h2 {
         <p>SCAN TO VERIFY CERTIFICATE</p>
     </div>
 
-    <div class="signature-section">
-        <div class="signature-line">
-            <div class="signature-name">ERNISTO DAEN</div>
-            <p class="signature-title">
-                Punong Barangay / Barangay Captain
-            </p>
-        </div>
-    </div>
+    <div class="signatures-row">
+      @if (!empty($attestedByName))
+          <div class="signature-section">
+              @if (!empty($attestSignatureUri))
+                  <img src="{{ $attestSignatureUri }}" alt="Attesting Signature" class="signature-img">
+              @endif
+              <div class="signature-line">
+                  <div class="signature-name">{{ $attestedByName }}</div>
+                  <p class="signature-title">{{ $attestedByTitle ?: 'Barangay Secretary' }}</p>
+              </div>
+          </div>
+      @endif
+
+      <div class="signature-section">
+          @if (!empty($primarySignatureUri))
+              <img src="{{ $primarySignatureUri }}" alt="Signatory E-Signature" class="signature-img">
+          @endif
+          <div class="signature-line">
+              <div class="signature-name">{{ $signatoryName }}</div>
+              <p class="signature-title">{{ $signatoryTitle }}</p>
+          </div>
+      </div>
+  </div>
 
     <div class="footer">
         This is a digitally generated certificate.

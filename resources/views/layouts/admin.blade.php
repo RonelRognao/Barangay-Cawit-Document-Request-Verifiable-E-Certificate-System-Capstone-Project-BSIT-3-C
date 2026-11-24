@@ -479,6 +479,62 @@
             background: rgba(255, 255, 255, 0.28);
             transform: translateY(-2px);
         }
+        /* PAGINATION */
+        .winter-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 18px;
+            padding-top: 14px;
+            border-top: 1px solid #e6f2f8;
+            font-size: 13px;
+            color: #486b82;
+        }
+        .wp-links {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+        .wp-btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 34px;
+            height: 34px;
+            padding: 0 11px;
+            border-radius: 8px;
+            border: 1px solid #cbe4f3;
+            background: #ffffff;
+            color: #174b70;
+            font-size: 13px;
+            font-weight: bold;
+            text-decoration: none;
+            transition: .2s;
+        }
+        a.wp-btn:hover {
+            background: #e2f4ff;
+            border-color: #65bce8;
+            color: #174b70;
+        }
+        .wp-active {
+            background: linear-gradient(120deg, #2586a8, #174b70);
+            border-color: #174b70;
+            color: #ffffff;
+        }
+        .wp-disabled {
+            background: #f8fafc;
+            border-color: #e2e8f0;
+            color: #94a3b8;
+            cursor: not-allowed;
+        }
+        .wp-dots {
+            padding: 0 4px;
+            color: #647f91;
+            font-weight: bold;
+        }
     </style>
     
     @if ($activeTheme === 'christmas')
@@ -494,6 +550,7 @@
 
 @php
     $pendingCount = \App\Models\DocumentRequest::where('status', 'Pending')->count();
+    $pendingKycCount = \App\Models\User::where('role', 'resident')->where('kyc_status', 'pending')->count();
 @endphp
 
 <header class="portal-header">
@@ -510,8 +567,9 @@
 
         <div class="header-actions">
             <span class="user-pill">
-                {{ $activeTheme === 'christmas' ? '🎄' : '👤' }} {{ auth()->user()->full_name }}
-            </span>
+              {{ $activeTheme === 'christmas' ? '🎄' : '👤' }}
+              {{ auth()->user()->full_name }} &middot; {{ auth()->user()->roleLabel() }}
+          </span>
 
             <form method="POST" action="{{ route('admin.theme.toggle') }}" style="margin: 0;">
                 @csrf
@@ -543,24 +601,67 @@
             @endif
         </a>
 
-        <a href="{{ route('admin.certificates.issue') }}"
-           class="nav-link {{ request()->routeIs('admin.certificates.issue') ? 'active' : '' }}">
-            📜 Issue E-Certificate
+        @if (auth()->user()->canProcessRequests())
+            <a href="{{ route('admin.walk_in.create') }}"
+               class="nav-link {{ request()->routeIs('admin.walk_in.*') ? 'active' : '' }}">
+                🚶 Walk-In
+            </a>
+        @endif
+
+        <a href="{{ route('admin.residents.index') }}"
+           class="nav-link {{ request()->routeIs('admin.residents.*') ? 'active' : '' }}">
+            🆔 Residents (RBI)
+            @if ($pendingKycCount > 0)
+                <span class="nav-badge">{{ $pendingKycCount }}</span>
+            @endif
         </a>
+
+        <a href="{{ route('admin.blotter.index') }}"
+           class="nav-link {{ request()->routeIs('admin.blotter.*') ? 'active' : '' }}">
+            ⚖️ Blotter
+        </a>
+
+        @if (auth()->user()->canIssueCertificates())
+            <a href="{{ route('admin.certificates.issue') }}"
+               class="nav-link {{ request()->routeIs('admin.certificates.issue') ? 'active' : '' }}">
+                📜 Issue E-Certificate
+            </a>
+        @endif
 
         <a href="{{ route('admin.certificates.history') }}"
            class="nav-link {{ request()->routeIs('admin.certificates.history') ? 'active' : '' }}">
             📚 Certificate History
         </a>
 
-        <a href="{{ route('admin.activity_logs') }}"
-           class="nav-link {{ request()->routeIs('admin.activity_logs') ? 'active' : '' }}">
-            📝 Activity Logs
-        </a>
-
         <a href="{{ route('verify') }}" target="_blank" class="nav-link">
             🔍 Verify Portal
         </a>
+
+        @if (auth()->user()->canManageGovernance())
+            <a href="{{ route('admin.document_types.index') }}"
+               class="nav-link {{ request()->routeIs('admin.document_types.*') ? 'active' : '' }}">
+                📄 Doc Types
+            </a>
+            <a href="{{ route('admin.officials.index') }}"
+               class="nav-link {{ request()->routeIs('admin.officials.*') ? 'active' : '' }}">
+                🏛️ Officials
+            </a>
+            <a href="{{ route('admin.staff.index') }}"
+               class="nav-link {{ request()->routeIs('admin.staff.*') ? 'active' : '' }}">
+                👥 Staff
+            </a>
+        @endif
+
+        @if (auth()->user()->canViewAuditLogs())
+            <a href="{{ route('admin.activity_logs') }}"
+               class="nav-link {{ request()->routeIs('admin.activity_logs*') ? 'active' : '' }}">
+                📝 Activity Logs
+            </a>
+            <a href="{{ route('admin.reports.index') }}"
+               class="nav-link {{ request()->routeIs('admin.reports.*') ? 'active' : '' }}">
+                📊 Reports
+            </a>
+        @endif
     </div>
 </nav>
 

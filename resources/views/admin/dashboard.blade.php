@@ -424,6 +424,7 @@ button, .shortcut a {
     background: rgba(255, 255, 255, 0.28);
     transform: translateY(-2px);
 }
+
 </style>
 
 @if ($activeTheme === 'christmas')
@@ -475,7 +476,7 @@ button, .shortcut a {
         <div class="welcome-content">
 
             <div>
-                <h2>Welcome, Administrator! {{ $activeTheme === 'christmas' ? '❄️' : '' }}</h2>
+                <h2>Welcome, {{ auth()->user()->full_name }} ({{ auth()->user()->roleLabel() }})! {{ $activeTheme === 'christmas' ? '❄️' : '' }}</h2>
 
                 <p>
                     Manage and monitor the Barangay Cawit Document Request
@@ -488,12 +489,14 @@ button, .shortcut a {
                 </p>
             </div>
 
-            <div class="welcome-tree" aria-hidden="true">🎄</div>
+            <div class="welcome-tree" aria-hidden="true">{{ $activeTheme === 'christmas' ? '🎄' : '🏛️' }}</div>
 
         </div>
 
         <p class="greeting">
-            ❄️ Season's Greetings from Barangay Cawit! 🎁
+            {{ $activeTheme === 'christmas'
+                ? "❄️ Season's Greetings from Barangay Cawit! 🎁"
+                : 'Barangay Cawit Official Electronic Records & Verification Portal' }}
         </p>
 
     </section>
@@ -541,37 +544,94 @@ button, .shortcut a {
         <div class="shortcut">
             <div class="icon">📋</div>
             <h3>Manage Requests</h3>
-            <p>Review and update resident document applications.</p>
+            <p>Review applications, derogatory hits, and COA O.R. payments.</p>
             <a href="{{ route('admin.requests.index') }}">Manage Requests</a>
         </div>
 
+        @if (auth()->user()->canProcessRequests())
+            <div class="shortcut">
+                <div class="icon">🚶</div>
+                <h3>Walk-In Intake</h3>
+                <p>Encode document requests for walk-in or non-smartphone residents.</p>
+                <a href="{{ route('admin.walk_in.create') }}">New Walk-In</a>
+            </div>
+        @endif
+
         <div class="shortcut">
-            <div class="icon">📜</div>
-            <h3>Issue E-Certificate</h3>
-            <p>Generate electronic certificates for approved requests.</p>
-            <a href="{{ route('admin.certificates.issue') }}">Issue Certificate</a>
+            <div class="icon">🆔</div>
+            <h3>Residents &amp; KYC</h3>
+            <p>Verify resident IDs, Purok assignments, and RBI records.</p>
+            <a href="{{ route('admin.residents.index') }}">Resident Registry</a>
+        </div>
+
+        <div class="shortcut">
+            <div class="icon">⚖️</div>
+            <h3>Blotter / Lupon</h3>
+            <p>Manage barangay dispute records and derogatory checks.</p>
+            <a href="{{ route('admin.blotter.index') }}">Blotter Records</a>
+        </div>
+
+        @if (auth()->user()->canIssueCertificates())
+            <div class="shortcut">
+                <div class="icon">📜</div>
+                <h3>Issue E-Certificate</h3>
+                <p>Generate QR-verifiable certificates for approved requests.</p>
+                <a href="{{ route('admin.certificates.issue') }}">Issue Certificate</a>
+            </div>
+        @endif
+
+        <div class="shortcut">
+            <div class="icon">📚</div>
+            <h3>Certificate History</h3>
+            <p>Search, print/PDF, and monitor valid, expired, or revoked certs.</p>
+            <a href="{{ route('admin.certificates.history') }}">View History</a>
         </div>
 
         <div class="shortcut">
             <div class="icon">🔍</div>
             <h3>Verify Certificates</h3>
-            <p>Open the certificate verification page.</p>
-            <a href="{{ route('verify') }}">Verify Certificate</a>
+            <p>Open the public QR certificate verification portal.</p>
+            <a href="{{ route('verify') }}" target="_blank">Verify Certificate</a>
         </div>
 
-        <div class="shortcut">
-            <div class="icon">📚</div>
-            <h3>Certificate History</h3>
-            <p>View all issued certificates, including valid and revoked certificates.</p>
-            <a href="{{ route('admin.certificates.history') }}">View History</a>
-        </div>
+        @if (auth()->user()->canManageGovernance())
+            <div class="shortcut">
+                <div class="icon">📄</div>
+                <h3>Document Types &amp; Fees</h3>
+                <p>Configure fees, exemptions, RA 11261 rules, and purposes.</p>
+                <a href="{{ route('admin.document_types.index') }}">Document Types</a>
+            </div>
 
-        <div class="shortcut">
-            <div class="icon">📝</div>
-            <h3>Admin Activity Logs</h3>
-            <p>Monitor and review administrative activities performed in the system.</p>
-            <a href="{{ route('admin.activity_logs') }}">View Activity Logs</a>
-        </div>
+            <div class="shortcut">
+                <div class="icon">🏛️</div>
+                <h3>Officials &amp; Signatories</h3>
+                <p>Manage Punong Barangay, OIC, Secretary, and e-signatures.</p>
+                <a href="{{ route('admin.officials.index') }}">Manage Officials</a>
+            </div>
+
+            <div class="shortcut">
+                <div class="icon">👥</div>
+                <h3>Barangay Staff (RBAC)</h3>
+                <p>Manage Secretary, Treasurer, and Clerk portal accounts.</p>
+                <a href="{{ route('admin.staff.index') }}">Manage Staff</a>
+            </div>
+        @endif
+
+        @if (auth()->user()->canViewAuditLogs())
+            <div class="shortcut">
+                <div class="icon">📝</div>
+                <h3>Admin Activity Logs</h3>
+                <p>Audit staff actions, IP addresses, and before/after changes.</p>
+                <a href="{{ route('admin.activity_logs') }}">View Activity Logs</a>
+            </div>
+
+            <div class="shortcut">
+                <div class="icon">📊</div>
+                <h3>DILG &amp; COA Reports</h3>
+                <p>Generate monthly issuance, O.R. collection, and waiver reports.</p>
+                <a href="{{ route('admin.reports.index') }}">View Reports</a>
+            </div>
+        @endif
 
     </section>
 
@@ -587,7 +647,7 @@ button, .shortcut a {
                         <th>Resident</th>
                         <th>Document</th>
                         <th>Purpose</th>
-                        <th>Date Requested</th>
+                        <th>Date Requested (PHT)</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -601,7 +661,7 @@ button, .shortcut a {
                         <td>{{ $request->user->full_name }}</td>
                         <td>{{ $request->documentType->document_name }}</td>
                         <td>{{ $request->purpose }}</td>
-                        <td>{{ $request->requested_at }}</td>
+                        <td>{{ \Carbon\Carbon::parse($request->requested_at)->timezone('Asia/Manila')->format('M d, Y h:i A') }}</td>
                         <td>
                             <span class="status {{ $statusClass }}">
                                 {{ $request->status }}

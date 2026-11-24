@@ -42,7 +42,7 @@ body {
 
 .container {
     width: 100%;
-    max-width: 540px;
+    max-width: 660px;
     position: relative;
     z-index: 2;
     background: rgba(255, 255, 255, .95);
@@ -191,6 +191,17 @@ a:hover { color: #174b70; text-decoration: underline; }
         transition-duration: .01ms !important;
     }
 }
+
+select {
+    width: 100%; padding: 12px 13px; border: 1px solid #c9dfea;
+    border-radius: 9px; font-size: 14px; outline: none; background: #f8fcff;
+}
+select:focus { border-color: #65bce8; background: white; box-shadow: 0 0 0 3px rgba(101, 188, 232, .15); }
+.reg-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 14px; }
+.rbi-checks { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 12px; font-size: 13px; color: #315b75; font-weight: bold; }
+.rbi-checks label { display: inline-flex; align-items: center; gap: 6px; margin: 0; cursor: pointer; }
+.rbi-checks input { width: auto; }
+@media (max-width: 560px) { .reg-grid { grid-template-columns: 1fr; } }
 </style>
 
 @if ($activeTheme === 'christmas')
@@ -232,69 +243,94 @@ a:hover { color: #174b70; text-decoration: underline; }
         </div>
     @endif
 
-    <form method="POST" action="{{ route('register') }}">
+    <form method="POST" action="{{ route('register') }}" enctype="multipart/form-data">
         @csrf
 
-        <label for="full_name">Full Name <span class="required">*</span></label>
-        <input
-            type="text"
-            id="full_name"
-            name="full_name"
-            value="{{ old('full_name') }}"
-            placeholder="Enter your full name"
-            autocomplete="name"
-            required
-        >
+        <div class="reg-grid">
+            <div>
+                <label for="full_name">Full Name <span class="required">*</span></label>
+                <input type="text" id="full_name" name="full_name" value="{{ old('full_name') }}" placeholder="Juan Dela Cruz" required>
+            </div>
+            <div>
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="email@example.com" required>
+            </div>
+            <div>
+                <label for="contact_number">Contact Number</label>
+                <input type="text" id="contact_number" name="contact_number" value="{{ old('contact_number') }}" placeholder="09XX XXX XXXX">
+            </div>
+            <div>
+                <label for="purok_id">Purok / Sitio <span class="required">*</span></label>
+                <select id="purok_id" name="purok_id" required>
+                    <option value="">-- Select Purok --</option>
+                    @foreach ($puroks as $purok)
+                        <option value="{{ $purok->id }}" {{ old('purok_id') == $purok->id ? 'selected' : '' }}>{{ $purok->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="birth_date">Date of Birth <span class="required">*</span></label>
+                <input type="date" id="birth_date" name="birth_date" value="{{ old('birth_date') }}" required>
+            </div>
+            <div>
+                <label for="sex">Sex <span class="required">*</span></label>
+                <select id="sex" name="sex" required>
+                    <option value="">-- Select --</option>
+                    <option value="Male" {{ old('sex') === 'Male' ? 'selected' : '' }}>Male</option>
+                    <option value="Female" {{ old('sex') === 'Female' ? 'selected' : '' }}>Female</option>
+                </select>
+            </div>
+            <div>
+                <label for="civil_status">Civil Status <span class="required">*</span></label>
+                <select id="civil_status" name="civil_status" required>
+                    @foreach (['Single', 'Married', 'Widowed', 'Separated'] as $cs)
+                        <option value="{{ $cs }}" {{ old('civil_status') === $cs ? 'selected' : '' }}>{{ $cs }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="residency_since">Residing in Brgy. Cawit Since <span class="required">*</span></label>
+                <input type="date" id="residency_since" name="residency_since" value="{{ old('residency_since') }}" required>
+            </div>
+        </div>
 
-        <label for="email">Email Address <span class="required">*</span></label>
-        <input
-            type="email"
-            id="email"
-            name="email"
-            value="{{ old('email') }}"
-            placeholder="Enter your email address"
-            autocomplete="email"
-            required
-        >
+        <label for="address">Complete House / Street Address <span class="required">*</span></label>
+        <textarea id="address" name="address" placeholder="House No., Street, Purok, Barangay Cawit, Manito, Albay" required>{{ old('address') }}</textarea>
 
-        <label for="contact_number">Contact Number</label>
-        <input
-            type="text"
-            id="contact_number"
-            name="contact_number"
-            value="{{ old('contact_number') }}"
-            placeholder="Enter your contact number"
-            autocomplete="tel"
-        >
+        <div class="rbi-checks">
+            <label><input type="checkbox" name="is_registered_voter" value="1" {{ old('is_registered_voter') ? 'checked' : '' }}> Registered Voter</label>
+            <label><input type="checkbox" name="is_senior_citizen" value="1" {{ old('is_senior_citizen') ? 'checked' : '' }}> Senior Citizen</label>
+            <label><input type="checkbox" name="is_pwd" value="1" {{ old('is_pwd') ? 'checked' : '' }}> PWD</label>
+        </div>
 
-        <label for="address">Complete Address</label>
-        <textarea
-            id="address"
-            name="address"
-            placeholder="Enter your complete address"
-        >{{ old('address') }}</textarea>
+        <div class="reg-grid">
+            <div>
+                <label for="valid_id_type">Valid ID Type <span class="required">*</span></label>
+                <select id="valid_id_type" name="valid_id_type" required>
+                    @foreach (['PhilSys National ID', "Voter's ID / Comelec Cert", "Driver's License", 'UMID / SSS / GSIS', 'Postal ID', 'Passport', 'School / Student ID', 'Senior Citizen / PWD ID'] as $idType)
+                        <option value="{{ $idType }}" {{ old('valid_id_type') === $idType ? 'selected' : '' }}>{{ $idType }}</option>
+                    @endforeach
+                </select>
+            </div>
+            <div>
+                <label for="valid_id">Upload Valid ID (JPG/PNG/PDF, max 4MB) <span class="required">*</span></label>
+                <input type="file" id="valid_id" name="valid_id" accept=".jpg,.jpeg,.png,.pdf" required>
+            </div>
+        </div>
 
-        <label for="password">Password <span class="required">*</span></label>
-        <input
-            type="password"
-            id="password"
-            name="password"
-            placeholder="Create a password"
-            minlength="8"
-            autocomplete="new-password"
-            required
-        >
+        <label for="proof_of_residency">Proof of Residency (Optional: Utility Bill / Lease)</label>
+        <input type="file" id="proof_of_residency" name="proof_of_residency" accept=".jpg,.jpeg,.png,.pdf">
 
-        <label for="confirm_password">Confirm Password <span class="required">*</span></label>
-        <input
-            type="password"
-            id="confirm_password"
-            name="password_confirmation"
-            placeholder="Confirm your password"
-            minlength="8"
-            autocomplete="new-password"
-            required
-        >
+        <div class="reg-grid">
+            <div>
+                <label for="password">Password <span class="required">*</span></label>
+                <input type="password" id="password" name="password" placeholder="Min. 8 characters" minlength="8" autocomplete="new-password" required>
+            </div>
+            <div>
+                <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                <input type="password" id="confirm_password" name="password_confirmation" placeholder="Confirm password" minlength="8" autocomplete="new-password" required>
+            </div>
+        </div>
 
         <button type="submit" class="auth-submit-btn">
             {{ $activeTheme === 'christmas' ? '🎁 Create Resident Account' : 'Create Resident Account' }}

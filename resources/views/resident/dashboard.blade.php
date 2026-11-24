@@ -432,7 +432,10 @@ footer {
         </div>
 
         <p class="greeting">
-            ❄️ Season's Greetings from Barangay Cawit! 🎁
+            {{ $activeTheme === 'christmas'
+                ? "❄️ Season's Greetings from Barangay Cawit! 🎁"
+                : 'Barangay Cawit Official Electronic Records & Verification Portal' 
+            }}
         </p>
 
     </section>

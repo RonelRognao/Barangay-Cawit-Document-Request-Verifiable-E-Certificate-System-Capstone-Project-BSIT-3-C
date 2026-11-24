@@ -131,7 +131,17 @@
         <strong>{{ $unread_count }}</strong>
         <span>Unread {{ $unread_count === 1 ? 'Notification' : 'Notifications' }}</span>
     </div>
-    <a href="{{ route('resident.dashboard') }}" class="btn-outline">← Back to Dashboard</a>
+
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        @if ($unread_count > 0)
+            <form method="POST" action="{{ route('resident.notifications.read_all') }}" style="margin: 0;">
+                @csrf
+                <button type="submit" class="read-btn">✓ Mark All as Read</button>
+            </form>
+        @endif
+
+        <a href="{{ route('resident.dashboard') }}" class="btn-outline">← Back to Dashboard</a>
+    </div>
 </div>
 
 @forelse ($notifications as $notification)

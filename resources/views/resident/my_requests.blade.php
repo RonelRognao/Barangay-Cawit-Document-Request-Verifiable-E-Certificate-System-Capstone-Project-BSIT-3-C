@@ -94,6 +94,7 @@
                         <th>Document</th>
                         <th>Purpose & Remarks</th>
                         <th>Date Requested</th>
+                        <th>Fee &amp; O.R.</th>
                         <th>Status</th>
                     </tr>
                 </thead>
@@ -110,16 +111,38 @@
                         @endphp
                         <tr>
                             <td class="ref-code">{{ $request->reference_no }}</td>
-                            <td><strong>{{ $request->documentType->document_name }}</strong></td>
                             <td>
+                                <strong>{{ $request->documentType->document_name }}</strong>
+                                @if (!empty($request->document_metadata['business_name']))
+                                    <div style="font-size: 11px; color: #486b82;">🏢 {{ $request->document_metadata['business_name'] }} ({{ $request->document_metadata['application_type'] ?? 'New' }})</div>
+                                @endif
+                            </td>
+                            <td>
+                                @if ($request->purpose_category)
+                                    <span style="display: inline-block; padding: 2px 7px; border-radius: 8px; background: #dff3ff; color: #174b70; font-size: 11px; font-weight: bold; margin-bottom: 3px;">
+                                        {{ $request->purpose_category }}
+                                    </span><br>
+                                @endif
                                 {{ $request->purpose }}
+                                @if ($request->attachment_path)
+                                    <div style="margin-top: 4px; font-size: 12px;">
+                                        <a href="{{ route('resident.requests.attachment', $request->id) }}" target="_blank" style="color: #174b70; font-weight: bold;">📎 View Uploaded Requirement</a>
+                                    </div>
+                                @endif
                                 @if (!empty($request->admin_remarks))
                                     <div class="remarks-note">
                                         <strong>Admin Remarks:</strong> {{ $request->admin_remarks }}
                                     </div>
                                 @endif
                             </td>
-                            <td>{{ \Carbon\Carbon::parse($request->requested_at)->format('M d, Y h:i A') }}</td>
+                            <td style="font-size: 12px; white-space: nowrap;">
+                                <strong>{{ (float) $request->final_fee > 0 ? '₱' . number_format((float) $request->final_fee, 2) : 'Free' }}</strong>
+                                <div style="color: {{ $request->payment_status === 'paid' ? '#166534' : ($request->payment_status === 'exempt' ? '#1e40af' : '#92400e') }}; font-weight: bold;">
+                                    {{ strtoupper($request->payment_status) }}
+                                    {{ $request->official_receipt_no ? '(O.R. #' . $request->official_receipt_no . ')' : '' }}
+                                </div>
+                            </td>
+                            <td>{{ \Carbon\Carbon::parse($request->requested_at)->timezone('Asia/Manila')->format('M d, Y h:i A') }}</td>
                             <td>
                                 <span class="status-pill" style="background: {{ $bg }}; color: {{ $fg }};">
                                     {{ $request->status }}

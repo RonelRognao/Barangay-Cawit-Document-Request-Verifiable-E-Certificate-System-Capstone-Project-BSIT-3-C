@@ -32,6 +32,59 @@
             box-shadow: 0 12px 35px rgba(15, 45, 75, .12);
         }
 
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 13px 15px;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            font-size: 14px;
+            outline: none;
+        }
+
+        .search-box input:focus {
+            border-color: #123b68;
+            box-shadow: 0 0 0 3px rgba(18, 59, 104, 0.12);
+        }
+
+        .search-box button {
+            padding: 13px 20px;
+            border: none;
+            border-radius: 10px;
+            background: #123b68;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .search-box button:hover {
+            background: #0d2b4d;
+        }
+
+        .info-box {
+            background: #f1f5f9;
+            border: 1px solid #cbd5e1;
+            color: #334155;
+            padding: 18px;
+            text-align: center;
+            border-radius: 12px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        @media (max-width: 550px) {
+            .search-box {
+                flex-direction: column;
+            }
+        }
+
         .header {
             text-align: center;
             border-bottom: 2px solid #e2e8f0;
@@ -153,6 +206,23 @@
                 font-size: 21px;
             }
         }
+
+        .privacy-banner {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 8px;
+            background: #eff6ff;
+            border: 1px solid #bfdbfe;
+            color: #1e3a8a;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 12px;
+            margin-bottom: 18px;
+        }
+        .reset-link { display: inline-block; margin-top: 18px; color: #123b68; font-size: 13px; font-weight: bold; text-decoration: none; }
+        .reset-link:hover { text-decoration: underline; }
     </style>
 </head>
 
@@ -173,24 +243,79 @@
         <p>Official Electronic Certificate Authentication</p>
     </div>
 
-    @if ($certificate)
+    <form method="GET" action="{{ route('verify') }}" class="search-box">
+        <input
+            type="text"
+            name="code"
+            value="{{ $code ?? '' }}"
+            placeholder="Enter Certificate No. (e.g., BRG-CERT-...) or Token"
+            required
+        >
+        <button type="submit">🔍 Verify</button>
+    </form>
+
+    @if ($certificate && $displayDetails)
         <div class="valid">
             ✓ VALID CERTIFICATE
-            <small>This electronic certificate is authentic and has not been revoked.</small>
+            <small>This electronic certificate is authentic, cryptographically verified, and has not been revoked.</small>
+        </div>
+
+        <div class="privacy-banner">
+            @if ($showFullDetails)
+                <span>🛡️ <strong>Authorized View:</strong> Full holder details displayed for Barangay Staff / Certificate Owner.</span>
+            @else
+                <span>🔒 <strong>RA 10173 Privacy Mode:</strong> Personal identifiers are partially masked for public protection.</span>
+            @endif
+            <span>🔐 Seal: <code>{{ $displayDetails['hash_fingerprint'] }}</code></span>
         </div>
 
         <div class="details">
-            <div class="item"><strong>Certificate Number</strong><span>{{ $certificate->certificate_no }}</span></div>
-            <div class="item"><strong>Resident Name</strong><span>{{ $certificate->request->user->full_name }}</span></div>
-            <div class="item"><strong>Document Type</strong><span>{{ $certificate->request->documentType->document_name }}</span></div>
-            <div class="item"><strong>Reference Number</strong><span>{{ $certificate->request->reference_no }}</span></div>
-            <div class="item"><strong>Date Issued</strong><span>{{ \Carbon\Carbon::parse($certificate->issued_at)->format('F d, Y h:i A') }}</span></div>
-            <div class="item"><strong>Verification Status</strong><span>Valid and Not Revoked</span></div>
+            <div class="item"><strong>Certificate Number</strong><span>{{ $displayDetails['certificate_no'] }}</span></div>
+            <div class="item"><strong>Certificate Holder</strong><span>{{ $displayDetails['holder_name'] }}</span></div>
+            <div class="item"><strong>Document Type</strong><span>{{ $displayDetails['document_name'] }}</span></div>
+            <div class="item"><strong>Reference Number</strong><span>{{ $displayDetails['reference_no'] }}</span></div>
+            <div class="item"><strong>Date Issued (PHT)</strong><span>{{ $displayDetails['issued_at'] }}</span></div>
+            <div class="item"><strong>Valid Until (PHT)</strong><span>{{ $displayDetails['expires_at'] }}</span></div>
+            <div class="item"><strong>Issuing Office</strong><span>Barangay Cawit, Manito, Albay</span></div>
+            <div class="item"><strong>Verification Status</strong><span>Valid &amp; Integrity Verified</span></div>
         </div>
-    @else
+        <div style="text-align: center;"><a href="{{ route('verify') }}" class="reset-link">↺ Verify Another Certificate</a></div>
+    @elseif ($revokedCertificate && $displayDetails)
+        <div class="invalid">
+            ✕ REVOKED CERTIFICATE
+            <p>{{ $error }}</p>
+        </div>
+        <div class="details">
+            <div class="item"><strong>Certificate Number</strong><span>{{ $displayDetails['certificate_no'] }}</span></div>
+            <div class="item"><strong>Certificate Holder</strong><span>{{ $displayDetails['holder_name'] }}</span></div>
+            <div class="item"><strong>Document Type</strong><span>{{ $displayDetails['document_name'] }}</span></div>
+            <div class="item"><strong>Date Revoked (PHT)</strong><span>{{ $displayDetails['revoked_at'] }}</span></div>
+            @if ($displayDetails['revocation_reason'])
+                <div class="item" style="grid-column: 1 / -1;"><strong>Revocation Reason</strong><span>{{ $displayDetails['revocation_reason'] }}</span></div>
+            @endif
+        </div>
+        <div style="text-align: center;"><a href="{{ route('verify') }}" class="reset-link">↺ Verify Another Certificate</a></div>
+        @elseif ($expiredCertificate && $displayDetails)
+        <div class="invalid" style="background: #fef3c7; border-color: #fcd34d; color: #92400e;">
+            ⌛ EXPIRED CERTIFICATE
+            <p>{{ $error }}</p>
+        </div>
+        <div class="details">
+            <div class="item"><strong>Certificate Number</strong><span>{{ $displayDetails['certificate_no'] }}</span></div>
+            <div class="item"><strong>Certificate Holder</strong><span>{{ $displayDetails['holder_name'] }}</span></div>
+            <div class="item"><strong>Document Type</strong><span>{{ $displayDetails['document_name'] }}</span></div>
+            <div class="item"><strong>Expired On (PHT)</strong><span>{{ $displayDetails['expires_at'] }}</span></div>
+        </div>
+        <div style="text-align: center;"><a href="{{ route('verify') }}" class="reset-link">↺ Verify Another Certificate</a></div>
+    @elseif ($searched)
         <div class="invalid">
             ✕ INVALID CERTIFICATE
             <p>{{ $error }}</p>
+        </div>
+        <div style="text-align: center;"><a href="{{ route('verify') }}" class="reset-link">↺ Try Another Search</a></div>
+    @else
+        <div class="info-box">
+            Enter a <strong>Certificate Number</strong> above or scan the <strong>QR Code</strong> on an official Barangay Cawit E-Certificate to verify its authenticity.
         </div>
     @endif
 
